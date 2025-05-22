@@ -1,42 +1,67 @@
-﻿using System.Windows;
+﻿using SimuladoConcursos.ViewModels;
 using SimuladoConcursos.Views;
-using SimuladoConcursos.ViewModels;
-using System.Windows.Controls;
+using System.Windows;
 
 namespace SimuladoConcursos
 {
     public partial class MainWindow : Window
     {
+        private readonly MainViewModel _viewModel;
+
         public MainWindow()
         {
             InitializeComponent();
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
+            _viewModel.RequestNavigation += OnRequestNavigation;
+
             ShowWelcomePage();
+        }
+
+        private void OnRequestNavigation(object sender, ViewModels.RequestNavigationEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (e.TargetPageType == typeof(SimuladoPage))
+                {
+                    var simuladoPage = new SimuladoPage();
+                    simuladoPage.DataContext = _viewModel;
+                    MainFrame.Navigate(simuladoPage);
+                }
+                else if (e.TargetPageType == typeof(WelcomePage))
+                {
+                    var welcomePage = new WelcomePage();
+                    welcomePage.DataContext = _viewModel;
+                    MainFrame.Navigate(welcomePage);
+                }
+                else if (e.TargetPageType == typeof(AddQuestionPage))
+                {
+                    var addQuestionPage = new AddQuestionPage();
+                    addQuestionPage.DataContext = _viewModel;
+                    MainFrame.Navigate(addQuestionPage);
+                }
+            });
         }
 
         public void ShowWelcomePage()
         {
-            NavigateToPage(new WelcomePage());
+            var welcomePage = new WelcomePage();
+            welcomePage.DataContext = _viewModel;
+            MainFrame.Navigate(welcomePage);
         }
 
         public void ShowAddQuestionPage()
         {
-            NavigateToPage(new AddQuestionPage());
+            var addQuestionPage = new AddQuestionPage();
+            addQuestionPage.DataContext = _viewModel;
+            MainFrame.Navigate(addQuestionPage);
         }
 
-        public void ShowSimuladoPage(SimuladoPage page = null)
+        public void ShowSimuladoPage()
         {
-            MainFrame.Navigate(page ?? new SimuladoPage());
-        }
-
-        public void NavigateToPage(Page page)
-        {
-            Content = page;
-
-            // Forçar atualização do DataContext se necessário
-            if (page.DataContext == null && Content is FrameworkElement element)
-            {
-                element.DataContext = new MainViewModel();
-            }
+            var simuladoPage = new SimuladoPage();
+            simuladoPage.DataContext = _viewModel;
+            MainFrame.Navigate(simuladoPage);
         }
     }
 }

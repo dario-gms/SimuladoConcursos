@@ -17,14 +17,5 @@ namespace SimuladoConcursos.Views
                 mainWindow.ShowAddQuestionPage();
             }
         }
-
-        private void NavigateToSimulado(object sender, RoutedEventArgs e)
-        {
-            if (Application.Current.MainWindow is MainWindow mainWindow)
-            {
-                // Cria uma nova instância da página para evitar problemas de estado
-                mainWindow.ShowSimuladoPage(new SimuladoPage());
-            }
-        }
     }
 }
