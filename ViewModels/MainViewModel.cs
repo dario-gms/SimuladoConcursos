@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SimuladoConcursos.ViewModels
 {
@@ -16,9 +17,12 @@ namespace SimuladoConcursos.ViewModels
     {
         private readonly DatabaseService _databaseService;
         private readonly TextProcessingService _textProcessingService;
+        private readonly DispatcherTimer _timer;
+        private readonly Stopwatch _stopwatch;
 
         public ObservableCollection<Question> Questions { get; } = new ObservableCollection<Question>();
         public ObservableCollection<RespostaUsuario> Respostas { get; } = new ObservableCollection<RespostaUsuario>();
+        public ObservableCollection<ResultadoViewModel> Resultados { get; } = new ObservableCollection<ResultadoViewModel>();
 
         private Question _currentQuestion;
         public Question CurrentQuestion
@@ -31,7 +35,11 @@ namespace SimuladoConcursos.ViewModels
         public int CurrentQuestionIndex
         {
             get => _currentQuestionIndex;
-            set => SetProperty(ref _currentQuestionIndex, value);
+            set
+            {
+                SetProperty(ref _currentQuestionIndex, value);
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private string _enunciado = string.Empty;
@@ -80,8 +88,12 @@ namespace SimuladoConcursos.ViewModels
             }
         }
 
-        private Stopwatch _stopwatch = new Stopwatch();
-        public TimeSpan TempoDecorrido => _stopwatch.Elapsed;
+        private TimeSpan _tempoDecorrido;
+        public TimeSpan TempoDecorrido
+        {
+            get => _tempoDecorrido;
+            set => SetProperty(ref _tempoDecorrido, value);
+        }
 
         public ICommand AddQuestionCommand { get; }
         public ICommand StartSimuladoCommand { get; }
@@ -96,18 +108,31 @@ namespace SimuladoConcursos.ViewModels
         {
             _databaseService = new DatabaseService();
             _textProcessingService = new TextProcessingService();
+            _stopwatch = new Stopwatch();
+            _timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _timer.Tick += Timer_Tick;
 
             AddQuestionCommand = new RelayCommand(AddQuestion);
             StartSimuladoCommand = new RelayCommand(async () => await StartSimuladoAsync(), CanStartSimulado);
-            NextQuestionCommand = new RelayCommand(NextQuestion, CanNavigate);
-            PreviousQuestionCommand = new RelayCommand(PreviousQuestion, CanNavigate);
+            NextQuestionCommand = new RelayCommand(NextQuestion, CanGoNext);
+            PreviousQuestionCommand = new RelayCommand(PreviousQuestion, CanGoPrevious);
             SubmitAnswerCommand = new RelayCommand(SubmitAnswer);
-            FinishSimuladoCommand = new RelayCommand(FinishSimulado);
+            FinishSimuladoCommand = new RelayCommand(FinishSimulado, () => IsSimuladoRunning);
 
             LoadQuestions();
         }
 
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            TempoDecorrido = _stopwatch.Elapsed;
+        }
+
         private bool CanStartSimulado() => !IsLoading && Questions.Count > 0;
+        private bool CanGoNext() => IsSimuladoRunning && !IsLoading && CurrentQuestionIndex < Questions.Count - 1;
+        private bool CanGoPrevious() => IsSimuladoRunning && !IsLoading && CurrentQuestionIndex > 0;
 
         private async void LoadQuestions()
         {
@@ -116,7 +141,7 @@ namespace SimuladoConcursos.ViewModels
                 IsLoading = true;
                 var questions = await _databaseService.GetAllQuestionsAsync();
 
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Questions.Clear();
                     foreach (var question in questions)
@@ -200,7 +225,10 @@ namespace SimuladoConcursos.ViewModels
                 CurrentQuestionIndex = 0;
                 CurrentQuestion = Questions[CurrentQuestionIndex];
                 Respostas.Clear();
+                Resultados.Clear();
                 _stopwatch.Restart();
+                _timer.Start();
+                TempoDecorrido = TimeSpan.Zero;
 
                 RequestNavigation?.Invoke(this, new RequestNavigationEventArgs(typeof(SimuladoPage)));
             }
@@ -214,24 +242,16 @@ namespace SimuladoConcursos.ViewModels
             }
         }
 
-        private bool CanNavigate() => IsSimuladoRunning && !IsLoading;
-
         private void NextQuestion()
         {
-            if (CurrentQuestionIndex < Questions.Count - 1)
-            {
-                CurrentQuestionIndex++;
-                CurrentQuestion = Questions[CurrentQuestionIndex];
-            }
+            CurrentQuestionIndex++;
+            CurrentQuestion = Questions[CurrentQuestionIndex];
         }
 
         private void PreviousQuestion()
         {
-            if (CurrentQuestionIndex > 0)
-            {
-                CurrentQuestionIndex--;
-                CurrentQuestion = Questions[CurrentQuestionIndex];
-            }
+            CurrentQuestionIndex--;
+            CurrentQuestion = Questions[CurrentQuestionIndex];
         }
 
         private void SubmitAnswer()
@@ -242,12 +262,14 @@ namespace SimuladoConcursos.ViewModels
         public void RegistrarResposta(int questionId, char resposta)
         {
             var respostaExistente = Respostas.FirstOrDefault(r => r.QuestionId == questionId);
+            var questao = Questions.First(q => q.Id == questionId);
+            bool acertou = resposta == questao.RespostaCorreta;
 
             if (respostaExistente != null)
             {
                 respostaExistente.Resposta = resposta;
                 respostaExistente.TempoGasto = TempoDecorrido;
-                respostaExistente.Acertou = resposta == Questions.First(q => q.Id == questionId).RespostaCorreta;
+                respostaExistente.Acertou = acertou;
             }
             else
             {
@@ -256,16 +278,32 @@ namespace SimuladoConcursos.ViewModels
                     QuestionId = questionId,
                     Resposta = resposta,
                     TempoGasto = TempoDecorrido,
-                    Acertou = resposta == Questions.First(q => q.Id == questionId).RespostaCorreta
+                    Acertou = acertou
                 });
             }
         }
 
         private void FinishSimulado()
         {
+            _timer.Stop();
             _stopwatch.Stop();
             IsSimuladoRunning = false;
-            RequestNavigation?.Invoke(this, new RequestNavigationEventArgs(typeof(WelcomePage)));
+
+            Resultados.Clear();
+            foreach (var resposta in Respostas)
+            {
+                var questao = Questions.First(q => q.Id == resposta.QuestionId);
+                Resultados.Add(new ResultadoViewModel
+                {
+                    Enunciado = questao.Enunciado,
+                    RespostaUsuario = resposta.Resposta.ToString(),
+                    RespostaCorreta = questao.RespostaCorreta.ToString(),
+                    Acertou = resposta.Acertou ?? false,
+                    TempoGasto = resposta.TempoGasto.ToString(@"mm\:ss")
+                });
+            }
+
+            RequestNavigation?.Invoke(this, new RequestNavigationEventArgs(typeof(ResultadoPage)));
         }
     }
 
@@ -277,5 +315,14 @@ namespace SimuladoConcursos.ViewModels
         {
             TargetPageType = targetPageType;
         }
+    }
+
+    public class ResultadoViewModel
+    {
+        public string Enunciado { get; set; }
+        public string RespostaUsuario { get; set; }
+        public string RespostaCorreta { get; set; }
+        public bool Acertou { get; set; }
+        public string TempoGasto { get; set; }
     }
 }

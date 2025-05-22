@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SimuladoConcursos"
              xmlns:converters="clr-namespace:SimuladoConcursos.Converters"
+             xmlns:viewModels="clr-namespace:SimuladoConcursos.ViewModels"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -11,6 +12,9 @@
                     <!-- Conversores -->
                     <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
                     <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+                    <converters:BooleanToResultadoConverter x:Key="BooleanToResultadoConverter"/>
+                    <converters:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
+                    <converters:IndexToVisibilityConverter x:Key="IndexToVisibilityConverter"/>
 
                     <!-- Estilos -->
                     <Style TargetType="Button">
@@ -44,6 +48,39 @@
                         <Setter Property="Foreground" Value="#FF3F51B5"/>
                         <Setter Property="Background" Value="#FFE0E0E0"/>
                         <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+
+                    <!-- Estilo para DataGrid -->
+                    <Style TargetType="DataGrid">
+                        <Setter Property="Margin" Value="10"/>
+                        <Setter Property="AutoGenerateColumns" Value="False"/>
+                        <Setter Property="IsReadOnly" Value="True"/>
+                        <Setter Property="SelectionMode" Value="Single"/>
+                        <Setter Property="SelectionUnit" Value="FullRow"/>
+                        <Setter Property="GridLinesVisibility" Value="None"/>
+                        <Setter Property="HeadersVisibility" Value="Column"/>
+                        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+                        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+                        <Setter Property="RowHeaderWidth" Value="0"/>
+                    </Style>
+
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="5"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Grid Background="{TemplateBinding Background}">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="Padding" Value="5"/>
                     </Style>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>

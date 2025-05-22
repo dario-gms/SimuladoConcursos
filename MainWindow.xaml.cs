@@ -40,6 +40,12 @@ namespace SimuladoConcursos
                     addQuestionPage.DataContext = _viewModel;
                     MainFrame.Navigate(addQuestionPage);
                 }
+                else if (e.TargetPageType == typeof(ResultadoPage))
+                {
+                    var resultadoPage = new ResultadoPage();
+                    resultadoPage.DataContext = _viewModel;
+                    MainFrame.Navigate(resultadoPage);
+                }
             });
         }
 
