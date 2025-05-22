@@ -1,0 +1,45 @@
+﻿<Page x:Class="SimuladoConcursos.Views.WelcomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:local="clr-namespace:SimuladoConcursos.Views"
+      xmlns:converters="clr-namespace:SimuladoConcursos.Converters"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="WelcomePage"
+      Background="#FFF0F0F0">
+
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="400">
+            <TextBlock Text="Bem-vindo ao Simulado Concursos/ENEM" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       TextAlignment="Center" 
+                       Margin="0,0,0,40"/>
+
+            <Button Content="Fazer Questões" 
+                    Height="50" 
+                    FontSize="18" 
+                    Margin="20" 
+                    Command="{Binding StartSimuladoCommand}"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+
+            <Button Content="Adicionar Questões" 
+                    Height="50" 
+                    FontSize="18" 
+                    Margin="20"
+                    Click="NavigateToAddQuestionPage"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+
+            <ProgressBar Height="10" 
+                         Margin="20,10" 
+                         IsIndeterminate="True" 
+                         Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+            <TextBlock Text="Carregando..." 
+                       HorizontalAlignment="Center"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
+    </Grid>
+</Page>

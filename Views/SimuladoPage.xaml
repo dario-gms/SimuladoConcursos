@@ -1,0 +1,115 @@
+﻿<Page x:Class="SimuladoConcursos.Views.SimuladoPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SimuladoConcursos.Views"
+      xmlns:converters="clr-namespace:SimuladoConcursos.Converters"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="SimuladoPage"
+      Background="#FFF0F0F0">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Overlay de carregamento -->
+        <Grid Grid.RowSpan="3" 
+              Background="#80000000" 
+              Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+              Panel.ZIndex="1">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" 
+                             Width="200" 
+                             Height="20" 
+                             Margin="0,0,0,10"/>
+                <TextBlock Text="Carregando..." 
+                           Foreground="White" 
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Cabeçalho -->
+        <Border Grid.Row="0" Background="#FF3F51B5" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding CurrentQuestion.AreaConhecimento, StringFormat='Área: {0}'}" 
+                           Foreground="White" 
+                           FontSize="16"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Tempo: " Foreground="White" FontSize="16"/>
+                    <TextBlock Text="{Binding TempoDecorrido, StringFormat='hh\\:mm\\:ss'}" 
+                               Foreground="White" 
+                               FontSize="16"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Corpo da questão -->
+        <ScrollViewer Grid.Row="1" Margin="20">
+            <StackPanel>
+                <TextBlock Text="{Binding CurrentQuestion.Enunciado}" 
+                           TextWrapping="Wrap" 
+                           FontSize="16" 
+                           Margin="0,0,0,20"/>
+
+                <ItemsControl ItemsSource="{Binding CurrentQuestion.Opcoes}"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton GroupName="Options" 
+                                         Content="{Binding Texto, StringFormat='{}{0}'}" 
+                                         Tag="{Binding Letra}"
+                                         Margin="0,5"
+                                         FontSize="14"
+                                         IsEnabled="{Binding DataContext.IsLoading, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource InverseBooleanConverter}}"
+                                         Checked="Option_Checked"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Rodapé com navegação -->
+        <Border Grid.Row="2" Background="#FFE0E0E0" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Content="Anterior" 
+                        Grid.Column="1" 
+                        Command="{Binding PreviousQuestionCommand}" 
+                        Margin="0,0,10,0" 
+                        Width="100"
+                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                <Button Content="Próxima" 
+                        Grid.Column="2" 
+                        Command="{Binding NextQuestionCommand}" 
+                        Margin="0,0,10,0" 
+                        Width="100"
+                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+
+                <Button Content="Finalizar" 
+                        Grid.Column="3" 
+                        Command="{Binding FinishSimuladoCommand}" 
+                        Width="100"
+                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

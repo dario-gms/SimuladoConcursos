@@ -1,0 +1,52 @@
+﻿<Application x:Class="SimuladoConcursos.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SimuladoConcursos"
+             xmlns:converters="clr-namespace:SimuladoConcursos.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <!-- Conversores -->
+                    <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+                    <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+
+                    <!-- Estilos -->
+                    <Style TargetType="Button">
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="Background" Value="#FF3F51B5"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF5C6BC0"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#FF9E9E9E"/>
+                                <Setter Property="Foreground" Value="#FFEEEEEE"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <Style TargetType="TextBox">
+                        <Setter Property="Padding" Value="5"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="BorderBrush" Value="#FFBDBDBD"/>
+                        <Setter Property="FontSize" Value="14"/>
+                        <Setter Property="Margin" Value="0,5,0,10"/>
+                    </Style>
+
+                    <Style TargetType="ProgressBar">
+                        <Setter Property="Height" Value="10"/>
+                        <Setter Property="Foreground" Value="#FF3F51B5"/>
+                        <Setter Property="Background" Value="#FFE0E0E0"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
