@@ -1,9 +1,11 @@
 ﻿using SimuladoConcursos.Models;
 using SimuladoConcursos.Services;
 using SimuladoConcursos.Utilities;
+using SimuladoConcursos.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -29,12 +31,7 @@ namespace SimuladoConcursos.ViewModels
         public int CurrentQuestionIndex
         {
             get => _currentQuestionIndex;
-            set
-            {
-                _currentQuestionIndex = value;
-                ((RelayCommand)NextQuestionCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)PreviousQuestionCommand).RaiseCanExecuteChanged();
-            }
+            set => SetProperty(ref _currentQuestionIndex, value);
         }
 
         private string _enunciado = string.Empty;
@@ -76,7 +73,11 @@ namespace SimuladoConcursos.ViewModels
         public bool IsLoading
         {
             get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            set
+            {
+                SetProperty(ref _isLoading, value);
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         private Stopwatch _stopwatch = new Stopwatch();
@@ -89,23 +90,26 @@ namespace SimuladoConcursos.ViewModels
         public ICommand SubmitAnswerCommand { get; }
         public ICommand FinishSimuladoCommand { get; }
 
+        public event EventHandler<RequestNavigationEventArgs> RequestNavigation;
+
         public MainViewModel()
         {
             _databaseService = new DatabaseService();
             _textProcessingService = new TextProcessingService();
 
-            // Carrega as questões de forma assíncrona ao iniciar
-            Task.Run(() => LoadQuestionsAsync());
-
             AddQuestionCommand = new RelayCommand(AddQuestion);
-            StartSimuladoCommand = new RelayCommand(async () => await StartSimuladoAsync());
+            StartSimuladoCommand = new RelayCommand(async () => await StartSimuladoAsync(), CanStartSimulado);
             NextQuestionCommand = new RelayCommand(NextQuestion, CanNavigate);
             PreviousQuestionCommand = new RelayCommand(PreviousQuestion, CanNavigate);
             SubmitAnswerCommand = new RelayCommand(SubmitAnswer);
             FinishSimuladoCommand = new RelayCommand(FinishSimulado);
+
+            LoadQuestions();
         }
 
-        private async Task LoadQuestionsAsync()
+        private bool CanStartSimulado() => !IsLoading && Questions.Count > 0;
+
+        private async void LoadQuestions()
         {
             try
             {
@@ -119,6 +123,7 @@ namespace SimuladoConcursos.ViewModels
                     {
                         Questions.Add(question);
                     }
+                    CommandManager.InvalidateRequerySuggested();
                 });
             }
             catch (Exception ex)
@@ -169,15 +174,14 @@ namespace SimuladoConcursos.ViewModels
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Questions.Add(question);
-
-                    // Limpar campos
                     Enunciado = string.Empty;
                     OpcoesText = string.Empty;
                     RespostaCorreta = '\0';
                     AreaConhecimento = string.Empty;
-
-                    MessageBox.Show("Questão adicionada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
+                    CommandManager.InvalidateRequerySuggested();
                 });
+
+                MessageBox.Show("Questão adicionada com sucesso!", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -189,45 +193,20 @@ namespace SimuladoConcursos.ViewModels
         {
             try
             {
-                if (IsLoading) return; // Previne reentrância
+                if (IsLoading) return;
 
                 IsLoading = true;
-                await Task.Delay(1); // Permite que a UI atualize o estado de carregamento
-
-                var questions = await _databaseService.GetAllQuestionsAsync();
-                Questions.Clear();
-
-                if (questions.Count == 0)
-                {
-                    MessageBox.Show("Nenhuma questão disponível. Adicione questões primeiro.",
-                                  "Aviso",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
-                    return;
-                }
-
-                foreach (var question in questions)
-                {
-                    Questions.Add(question);
-                }
-
                 IsSimuladoRunning = true;
                 CurrentQuestionIndex = 0;
                 CurrentQuestion = Questions[CurrentQuestionIndex];
                 Respostas.Clear();
                 _stopwatch.Restart();
 
-                if (Application.Current.MainWindow is MainWindow mainWindow)
-                {
-                    mainWindow.ShowSimuladoPage();
-                }
+                RequestNavigation?.Invoke(this, new RequestNavigationEventArgs(typeof(SimuladoPage)));
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao iniciar simulado: {ex.Message}",
-                               "Erro",
-                               MessageBoxButton.OK,
-                               MessageBoxImage.Error);
+                MessageBox.Show($"Erro ao iniciar simulado: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -268,6 +247,7 @@ namespace SimuladoConcursos.ViewModels
             {
                 respostaExistente.Resposta = resposta;
                 respostaExistente.TempoGasto = TempoDecorrido;
+                respostaExistente.Acertou = resposta == Questions.First(q => q.Id == questionId).RespostaCorreta;
             }
             else
             {
@@ -275,7 +255,8 @@ namespace SimuladoConcursos.ViewModels
                 {
                     QuestionId = questionId,
                     Resposta = resposta,
-                    TempoGasto = TempoDecorrido
+                    TempoGasto = TempoDecorrido,
+                    Acertou = resposta == Questions.First(q => q.Id == questionId).RespostaCorreta
                 });
             }
         }
@@ -284,15 +265,17 @@ namespace SimuladoConcursos.ViewModels
         {
             _stopwatch.Stop();
             IsSimuladoRunning = false;
-            MessageBox.Show($"Simulado finalizado! Tempo total: {TempoDecorrido:hh\\:mm\\:ss}",
-                           "Resultado",
-                           MessageBoxButton.OK,
-                           MessageBoxImage.Information);
+            RequestNavigation?.Invoke(this, new RequestNavigationEventArgs(typeof(WelcomePage)));
+        }
+    }
 
-            if (Application.Current.MainWindow is MainWindow mainWindow)
-            {
-                mainWindow.ShowWelcomePage();
-            }
+    public class RequestNavigationEventArgs : EventArgs
+    {
+        public Type TargetPageType { get; }
+
+        public RequestNavigationEventArgs(Type targetPageType)
+        {
+            TargetPageType = targetPageType;
         }
     }
 }
