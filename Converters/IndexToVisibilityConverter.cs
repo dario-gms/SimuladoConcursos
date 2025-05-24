@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using SimuladoConcursos.ViewModels;
 
 namespace SimuladoConcursos.Converters
 {
@@ -10,16 +9,16 @@ namespace SimuladoConcursos.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is int currentIndex && parameter is Visibility lastPageVisibility)
+            if (value is int currentIndex && parameter is string tipoBotao)
             {
-                var vm = Application.Current.MainWindow?.DataContext as MainViewModel;
-                if (vm != null && currentIndex == vm.Questions.Count - 1)
+                return tipoBotao switch
                 {
-                    return lastPageVisibility;
-                }
-                return lastPageVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+                    "Proxima" => currentIndex < 50 ? Visibility.Visible : Visibility.Collapsed,
+                    "Finalizar" => currentIndex >= 50 ? Visibility.Visible : Visibility.Collapsed,
+                    _ => Visibility.Collapsed
+                };
             }
-            return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

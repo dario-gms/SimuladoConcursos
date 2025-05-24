@@ -3,8 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:SimuladoConcursos.Views"
-      xmlns:viewModels="clr-namespace:SimuladoConcursos.ViewModels"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Adicionar Questão"
@@ -21,6 +19,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Cabeçalho -->
             <TextBlock Text="Adicionar Nova Questão" 
                        Grid.Row="0" 
                        FontSize="20" 
@@ -28,47 +27,56 @@
                        Margin="0,0,0,20"
                        Foreground="#FF3F51B5"/>
 
+            <!-- Enunciado -->
             <Label Content="Enunciado:" Grid.Row="1"/>
             <TextBox Grid.Row="1" 
                      Height="100" 
                      Text="{Binding Enunciado, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                      Margin="0,5,0,20" 
-                     TextWrapping="Wrap" 
-                     AcceptsReturn="True"/>
+                     TextWrapping="Wrap"/>
 
-            <Label Content="Opções (Cole o texto com as opções A, B, C, etc.):" Grid.Row="2"/>
+            <!-- Opções -->
+            <Label Content="Opções (Formato: A) Texto da opção A [Enter] B) Texto da opção B)" Grid.Row="2"/>
             <TextBox Grid.Row="2" 
                      Height="150" 
                      Text="{Binding OpcoesText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                      Margin="0,5,0,20" 
-                     TextWrapping="Wrap" 
+                     TextWrapping="Wrap"
                      AcceptsReturn="True"/>
 
+            <!-- Resposta Correta -->
             <Label Content="Resposta Correta (Letra):" Grid.Row="3"/>
+            <TextBox Grid.Row="3" 
+                     Text="{Binding RespostaCorreta, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="1"
+                     Width="50"
+                     HorizontalAlignment="Left"
+                     Margin="133,5,0,20"
+                     PreviewTextInput="RespostaCorreta_PreviewTextInput"
+                     TextChanged="RespostaCorreta_TextChanged"
+                     CharacterCasing="Upper"
+                     FontWeight="Bold"/>
 
-            <Label Content="Área de Conhecimento:" Grid.Row="4"/>
-            <TextBox Grid.Row="4" 
-                     Text="{Binding AreaConhecimento, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     Margin="0,5,0,20"/>
-            
-            <Button Content ="Voltar"
-                    Grid.Row = "5"
-                    Height = "40"
-                    HorizontalAlignment = "Left"
-                    Width="100"
-                    Click="VoltarButton_Click"
-                    Background="#FF757575"
-                    Foreground="White"/>
-                    
+            <!-- Área de Conhecimento -->
+            <Label Content="" Grid.Row="4"/>
 
-            <Button Content="Adicionar Questão" 
-                    Grid.Row="5" 
-                    Height="40" 
-                    Command="{Binding AddQuestionCommand}" 
-                    HorizontalAlignment="Right" 
-                    Width="150"
-                    Background="#FF3F51B5"
-                    Foreground="White"/>
+            <!-- Botões -->
+            <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20">
+                <Button Content="Voltar"
+                        Height="40"
+                        Width="100"
+                        Click="VoltarButton_Click"
+                        Margin="0,0,10,0"
+                        Background="#FF757575"
+                        Foreground="White"/>
+
+                <Button Content="Adicionar Questão" 
+                        Height="40" 
+                        Width="150"
+                        Command="{Binding AddQuestionCommand}" 
+                        Background="#FF3F51B5"
+                        Foreground="White"/>
+            </StackPanel>
         </Grid>
     </ScrollViewer>
 </Page>

@@ -3,7 +3,6 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:SimuladoConcursos.Views"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SimuladoPage"
@@ -18,77 +17,53 @@
 
         <!-- Cabeçalho -->
         <Border Grid.Row="0" Background="#FF3F51B5" Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <TextBlock Text="Tempo: " Foreground="White" FontSize="16"/>
-                    <TextBlock Text="{Binding TempoDecorrido, StringFormat='hh\\:mm\\:ss'}" 
-                               Foreground="White" 
-                               FontSize="16"/>
-                </StackPanel>
-            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="Tempo: " Foreground="White" FontSize="16"/>
+                <TextBlock Text="{Binding TempoDecorrido, StringFormat='hh\\:mm\\:ss'}" 
+                           Foreground="White" FontSize="16"/>
+            </StackPanel>
         </Border>
 
-        <!-- Corpo da questão -->
+        <!-- Corpo da Questão -->
         <ScrollViewer Grid.Row="1" Margin="20">
             <StackPanel>
                 <TextBlock Text="{Binding CurrentQuestion.Enunciado}" 
-                           TextWrapping="Wrap" 
-                           FontSize="16" 
-                           Margin="0,0,0,20"/>
+                           TextWrapping="Wrap" FontSize="16" Margin="0,0,0,20"/>
 
                 <ItemsControl ItemsSource="{Binding CurrentQuestion.Opcoes}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton GroupName="Options" 
-                                         Content="{Binding Texto, StringFormat='{}{0}'}" 
-                                         Tag="{Binding Letra}"
-                                         Margin="0,5"
-                                         FontSize="14"
-                                         IsEnabled="{Binding DataContext.IsLoading, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource InverseBooleanConverter}}"
-                                         Checked="Option_Checked"/>
+                            <RadioButton GroupName="Options" Margin="0,5" FontSize="14"
+                                      IsChecked="{Binding IsSelected}"
+                                      IsEnabled="{Binding DataContext.IsLoading, RelativeSource={RelativeSource AncestorType=Page}, Converter={StaticResource InverseBooleanConverter}}"
+                                      Checked="Option_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Letra, StringFormat='({0}) '}" 
+                                            FontWeight="Bold" Margin="0,0,5,0"/>
+                                    <TextBlock Text="{Binding Texto}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </RadioButton>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Rodapé com navegação -->
+        <!-- Rodapé Simplificado -->
         <Border Grid.Row="2" Background="#FFE0E0E0" Padding="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <Button Content="Anterior" 
-                        Grid.Column="1" 
-                        Command="{Binding PreviousQuestionCommand}" 
-                        Margin="0,0,10,0" 
-                        Width="100"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"/>
-
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Próxima" 
-                        Grid.Column="2" 
-                        Command="{Binding NextQuestionCommand}" 
-                        Margin="0,0,10,0" 
-                        Width="100"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                        Visibility="{Binding CurrentQuestionIndex, Converter={StaticResource IndexToVisibilityConverter}, ConverterParameter={x:Static Visibility.Collapsed}}"/>
+                     Command="{Binding NextQuestionCommand}" 
+                     Margin="10,0" Width="100"
+                     IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                     Visibility="{Binding ShowProximaButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                 <Button Content="Finalizar" 
-                        Grid.Column="3" 
-                        Command="{Binding FinishSimuladoCommand}" 
-                        Width="100"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                        Visibility="{Binding CurrentQuestionIndex, Converter={StaticResource IndexToVisibilityConverter}, ConverterParameter={x:Static Visibility.Visible}}"/>
-            </Grid>
+                     Command="{Binding FinishSimuladoCommand}" 
+                     Margin="10,0" Width="100"
+                     IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                     Visibility="{Binding ShowFinalizarButton, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </StackPanel>
         </Border>
     </Grid>
 </Page>
