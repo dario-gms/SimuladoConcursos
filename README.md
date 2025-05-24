@@ -8,7 +8,7 @@ Aplicativo desktop para criação e realização de simulados com correção aut
 ## ✨ Funcionalidades
 
 - ✅ Criação de questões com múltiplas opções
-- ✅ Simulado cronometrado com navegação entre questões
+- ✅ Simulado cronometrado
 - ✅ Correção automática com detalhes de desempenho
 - ✅ Visualização de resultados com:
   - Tempo gasto por questão
