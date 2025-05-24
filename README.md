@@ -8,7 +8,7 @@ Aplicativo desktop para criação e realização de simulados com correção aut
 ## ✨ Funcionalidades
 
 - ✅ Criação de questões com múltiplas opções
-- ✅ Simulado cronometrado com navegação entre questões
+- ✅ Simulado cronometrado
 - ✅ Correção automática com detalhes de desempenho
 - ✅ Visualização de resultados com:
   - Tempo gasto por questão
@@ -147,5 +147,7 @@ SOFTWARE.
 - [ ] Modo de estudo por tópicos
 
 Link do Projeto: https://github.com/dario-gms/SimuladoConcursos
+
+Link para download do programa na versão mais recente: https://github.com/dario-gms/SimuladoConcursos/releases/tag/%23v1.0.0
 
 
