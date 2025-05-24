@@ -31,7 +31,7 @@ namespace SimuladoConcursos.Services
                 .ToListAsync();
         }
 
-        public async Task<Question> GetQuestionByIdAsync(int id)
+        public async Task<Question?> GetQuestionByIdAsync(int id)
         {
             return await _context.Questions
                 .Include(q => q.Opcoes)

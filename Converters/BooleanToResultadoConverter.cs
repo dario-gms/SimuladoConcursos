@@ -8,7 +8,7 @@ namespace SimuladoConcursos.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (value is bool && (bool)value) ? "Acertou" : "Errou";
+            return (value is bool boolValue && boolValue) ? "Acertou" : "Errou";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

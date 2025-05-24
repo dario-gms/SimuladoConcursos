@@ -23,13 +23,20 @@ namespace SimuladoConcursos.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Question>().OwnsMany(
-                q => q.Opcoes, o =>
+            modelBuilder.Entity<Question>(entity =>
+            {
+                entity.OwnsMany(q => q.Opcoes, o =>
                 {
                     o.WithOwner().HasForeignKey("QuestionId");
                     o.Property<int>("Id");
                     o.HasKey("Id");
                 });
+
+                entity.Property(q => q.RespostaCorreta)
+                      .HasConversion(
+                          v => v.ToUpper(),
+                          v => v);
+            });
         }
     }
 }
