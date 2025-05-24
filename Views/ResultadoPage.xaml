@@ -3,30 +3,60 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:SimuladoConcursos.Views"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ResultadoPage">
+      Title="ResultadoPage"
+      Background="#FFF0F0F0">
 
-    <ScrollViewer>
-        <StackPanel Margin="20">
-            <TextBlock Text="Resultado do Simulado" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,20"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-            <TextBlock Text="{Binding TempoDecorrido, StringFormat='Tempo total: {0:hh\\:mm\\:ss}'}" 
-                       FontSize="16" 
-                       Margin="0,0,0,20"/>
+        <TextBlock Grid.Row="0" Text="Resultado do Simulado" 
+                   FontSize="24" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="0,20"/>
 
-            <!-- Aqui viria a lista de questões e respostas -->
-
-            <Button Content="Voltar ao Início" 
-                    HorizontalAlignment="Center" 
-                    Margin="0,20" 
-                    Width="150" 
-                    Height="40"
-                    Click="VoltarButton_Click"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Text="Tempo Total: " FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="{Binding TotalTime, StringFormat='{}{0:hh\\:mm\\:ss}'}" 
+                       FontSize="16" Margin="10,0"/>
         </StackPanel>
-    </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10">
+            <TextBlock Text="Pontuação: " FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="{Binding Score}" 
+                       FontSize="16" Margin="10,0"
+                       Foreground="{Binding Score, Converter={StaticResource ScoreToColorConverter}}"/>
+        </StackPanel>
+
+        <DataGrid Grid.Row="3" Margin="20,10"
+                  ItemsSource="{Binding Resultados}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Enunciado" Binding="{Binding Enunciado}" Width="*"/>
+                <DataGridTextColumn Header="Sua Resposta" Binding="{Binding RespostaUsuario}" Width="100"/>
+                <DataGridTextColumn Header="Resposta Correta" Binding="{Binding RespostaCorreta}" Width="100"/>
+                <DataGridTextColumn Header="Tempo" Binding="{Binding TempoGasto}" Width="80"/>
+                <DataGridTemplateColumn Header="Resultado" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Acertou, Converter={StaticResource BooleanToResultadoConverter}}"
+                                       Foreground="{Binding Acertou, Converter={StaticResource BooleanToColorConverter}}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Grid.Row="4" Content="Voltar ao Início" 
+                HorizontalAlignment="Center" Margin="0,20"
+                Width="150" Height="40"
+                Click="VoltarButton_Click"/>
+    </Grid>
 </Page>

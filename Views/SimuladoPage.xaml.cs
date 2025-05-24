@@ -1,9 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using SimuladoConcursos.ViewModels;
 using System.Threading.Tasks;
-using SimuladoConcursos.Models;
 
 namespace SimuladoConcursos.Views
 {
@@ -12,47 +10,24 @@ namespace SimuladoConcursos.Views
         public SimuladoPage()
         {
             InitializeComponent();
-            Loaded += SimuladoPage_Loaded;
+            Loaded += OnLoaded;
         }
 
-        private async void SimuladoPage_Loaded(object sender, RoutedEventArgs e)
+        private async void OnLoaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is MainViewModel viewModel)
+            if (DataContext is MainViewModel viewModel && !viewModel.IsSimuladoRunning)
             {
-                try
-                {
-                    await viewModel.StartSimuladoAsync();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Erro ao carregar simulado: {ex.Message}",
-                                  "Erro",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Error);
-
-                    if (Application.Current.MainWindow is MainWindow mainWindow)
-                    {
-                        mainWindow.ShowWelcomePage();
-                    }
-                }
+                await viewModel.StartSimuladoAsync();
             }
         }
 
         private void Option_Checked(object sender, RoutedEventArgs e)
         {
-            if (sender is RadioButton radioButton &&
-                radioButton.Tag is char letra &&
-                DataContext is MainViewModel viewModel)
+            if (sender is RadioButton { DataContext: Models.Option option } &&
+                DataContext is MainViewModel viewModel &&
+                viewModel.CurrentQuestion != null)
             {
-                var resposta = new RespostaUsuario
-                {
-                    QuestionId = viewModel.CurrentQuestion.Id,
-                    Resposta = letra,
-                    TempoGasto = viewModel.TempoDecorrido
-                };
-
-                // Aqui você pode adicionar a resposta à coleção
-                // ou chamar um método no ViewModel para registrar
+                viewModel.RegistrarResposta(viewModel.CurrentQuestion.Id, option.Letra);
             }
         }
     }

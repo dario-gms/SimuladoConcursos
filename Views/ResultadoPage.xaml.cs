@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using SimuladoConcursos.ViewModels;
 
 namespace SimuladoConcursos.Views
 {
@@ -9,12 +8,14 @@ namespace SimuladoConcursos.Views
         public ResultadoPage()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
         }
 
         private void VoltarButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new WelcomePage());
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.ShowWelcomePage();
+            }
         }
     }
 }
