@@ -143,6 +143,7 @@ SOFTWARE.
 - [ ] Modo de estudo por tópicos
 
 Link do Projeto: https://github.com/dario-gms/SimuladoConcursos
+
 Link para download do programa na versão mais recente: https://github.com/dario-gms/SimuladoConcursos/releases/tag/%23v1.0.0
 
 
