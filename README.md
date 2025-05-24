@@ -93,8 +93,12 @@ SimuladoConcursos/
 │   ├── SimuladoPage.xaml
 │   └── ResultadoPage.xaml
 ├── Converters/         # Conversores XAML
+│   ├── BooleanToColorConverter.cs
+│   ├── BooleanToResultadoConverter.cs
 │   ├── BooleanToVisibilityConverter.cs
-│   └── ... (outros conversores)
+│   ├── IndexToVisibilityConverter.cs
+│   ├── InverseBooleanConverter.cs
+│   └── ScoreToColorConverter.cs
 ├── App.xaml            # Configuração global
 └── MainWindow.xaml     # Janela principal
 ```
